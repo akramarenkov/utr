@@ -111,7 +111,7 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 // [WithHTTPTransport] functions.
 //
 // If the path resolver is not set using [WithResolver] function the package-wide
-// resolver will be used. In this case, the mapping of the name and path to the Unix
+// [Keeper] will be used. In this case, the mapping of the name and path to the Unix
 // socket can be added using the [AddPath] function.
 //
 // If URL schemes for operation HTTP and HTTPS via Unix socket are not set using

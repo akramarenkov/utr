@@ -6,10 +6,12 @@ import (
 	"sync"
 )
 
+// Keeper using [sync.Map].
 type MapKeeper struct {
 	table sync.Map
 }
 
+// Adds mapping of name and path to Unix socket.
 func (mkr *MapKeeper) AddPath(host, path string) error {
 	if err := isValidHost(host); err != nil {
 		return err
@@ -36,6 +38,7 @@ func isValidHost(host string) error {
 	return nil
 }
 
+// Resolves path to Unix socket by name.
 func (mkr *MapKeeper) LookupPath(host string) (string, error) {
 	path, exists := mkr.table.Load(host)
 	if !exists {
