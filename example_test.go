@@ -14,21 +14,9 @@ import (
 )
 
 func Example() {
-	const (
-		hostname    = "service"
-		requestPath = "/request/path"
-		socketPath  = "service.sock"
-	)
+	const socketPath = "service.sock"
 
 	message := []byte("example message")
-
-	if err := utr.Register(utr.WithHTTPDefaultTransport()); err != nil {
-		panic(err)
-	}
-
-	if err := utr.AddPath(hostname, socketPath); err != nil {
-		panic(err)
-	}
 
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
@@ -38,7 +26,7 @@ func Example() {
 	var router http.ServeMux
 
 	router.HandleFunc(
-		requestPath,
+		"/request/path",
 		func(w http.ResponseWriter, _ *http.Request) {
 			_, _ = w.Write(message)
 		},
@@ -68,6 +56,14 @@ func Example() {
 	go func() {
 		faults <- server.Serve(listener)
 	}()
+
+	if err := utr.Register(utr.WithHTTPDefaultTransport()); err != nil {
+		panic(err)
+	}
+
+	if err := utr.AddPath("service", socketPath); err != nil {
+		panic(err)
+	}
 
 	resp, err := http.Get("http+unix://service/request/path")
 	if err != nil {
