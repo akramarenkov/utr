@@ -114,15 +114,6 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	)
 
 	message := prepareMessage(t)
-	httpTransport := cloneDefaultHTTPTransport(t)
-
-	if useHTTP2 {
-		protos.SetUnencryptedHTTP2(true)
-		httpTransport.Protocols = &protos
-	}
-
-	require.NoError(t, keeper.AddPath(testHostname, socketPath))
-	require.NoError(t, Register(WithHTTPTransport(httpTransport), WithResolver(&keeper)))
 
 	listener, err := net.Listen(NetworkName, socketPath)
 	require.NoError(t, err)
@@ -142,6 +133,7 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	}
 
 	if useHTTP2 {
+		protos.SetUnencryptedHTTP2(true)
 		server.Protocols = &protos
 	}
 
@@ -155,6 +147,15 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	go func() {
 		faults <- server.Serve(listener)
 	}()
+
+	httpTransport := cloneDefaultHTTPTransport(t)
+
+	if useHTTP2 {
+		httpTransport.Protocols = &protos
+	}
+
+	require.NoError(t, keeper.AddPath(testHostname, socketPath))
+	require.NoError(t, Register(WithHTTPTransport(httpTransport), WithResolver(&keeper)))
 
 	client := &http.Client{
 		Transport: httpTransport,
@@ -218,17 +219,7 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	)
 
 	message := prepareMessage(t)
-	httpTransport := cloneDefaultHTTPTransport(t)
 	caPool, serverCerts, clientCerts := genTempPKI(t, socketPath)
-
-	httpTransport.TLSClientConfig = &tls.Config{
-		Certificates: clientCerts,
-		MinVersion:   tls.VersionTLS13,
-		RootCAs:      caPool,
-	}
-
-	require.NoError(t, keeper.AddPath(testHostname, socketPath))
-	require.NoError(t, Register(WithHTTPTransport(httpTransport), WithResolver(&keeper)))
 
 	listenTLSConfig := &tls.Config{
 		Certificates: serverCerts,
@@ -268,6 +259,17 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	go func() {
 		faults <- server.Serve(listener)
 	}()
+
+	httpTransport := cloneDefaultHTTPTransport(t)
+
+	httpTransport.TLSClientConfig = &tls.Config{
+		Certificates: clientCerts,
+		MinVersion:   tls.VersionTLS13,
+		RootCAs:      caPool,
+	}
+
+	require.NoError(t, keeper.AddPath(testHostname, socketPath))
+	require.NoError(t, Register(WithHTTPTransport(httpTransport), WithResolver(&keeper)))
 
 	client := &http.Client{
 		Transport: httpTransport,
