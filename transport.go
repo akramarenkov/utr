@@ -67,7 +67,7 @@ func WithResolver(resolver Resolver) Adjuster {
 	return adjust(adj)
 }
 
-// Sets URL scheme for operation with HTTP via Unix socket.
+// Sets URL scheme for operation HTTP via Unix socket.
 func WithSchemeHTTP(scheme string) Adjuster {
 	adj := func(trt *Transport) error {
 		if scheme == "" {
@@ -86,7 +86,7 @@ func WithSchemeHTTP(scheme string) Adjuster {
 	return adjust(adj)
 }
 
-// Sets URL scheme for operation with HTTPS via Unix socket.
+// Sets URL scheme for operation HTTPS via Unix socket.
 func WithSchemeHTTPS(scheme string) Adjuster {
 	adj := func(trt *Transport) error {
 		if scheme == "" {
@@ -114,11 +114,11 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 // resolver will be used. In this case, the mapping of the name and path to the Unix
 // socket can be added using the [AddPath] function.
 //
-// If URL schemes for operation HTTP and HTTPS over Unix socket are not set using
+// If URL schemes for operation HTTP and HTTPS via Unix socket are not set using
 // [WithSchemeHTTP] and [WithSchemeHTTPS] functions, then URL schemes
-// [DefaultSchemeHTTP] and [DefaultSchemeHTTPS] will be used.
-// Multiple Unix socket transports with the same URL schemes cannot be registered
-// for one upstream [http.Transport].
+// [DefaultSchemeHTTP] and [DefaultSchemeHTTPS] will be used. Multiple Unix socket
+// transports with the same URL schemes cannot be registered for one upstream
+// [http.Transport].
 func Register(opts ...Adjuster) error {
 	trt := &Transport{}
 
@@ -181,7 +181,7 @@ func (trt *Transport) register(scheme string) error {
 	return <-errs
 }
 
-// RoundTrip implements the [http.RoundTripper] interface.
+// Implements the [http.RoundTripper] interface.
 func (trt *Transport) RoundTrip(request *http.Request) (*http.Response, error) {
 	cloned := request.Clone(request.Context())
 

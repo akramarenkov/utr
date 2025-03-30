@@ -81,17 +81,17 @@ func TestWithSchemeHTTPS(t *testing.T) {
 }
 
 func TestRegister(t *testing.T) {
-	forHTTP := &http.Transport{}
-	forHTTPS := &http.Transport{}
+	upstreamHTTP := &http.Transport{}
+	upstreamHTTPS := &http.Transport{}
 
 	require.Error(t, Register())
 	require.Error(t, Register(WithHTTPTransport(nil)))
 
-	require.NoError(t, Register(WithHTTPTransport(forHTTP)))
-	require.Error(t, Register(WithHTTPTransport(forHTTP)))
+	require.NoError(t, Register(WithHTTPTransport(upstreamHTTP)))
+	require.Error(t, Register(WithHTTPTransport(upstreamHTTP)))
 
-	require.NoError(t, Register(WithHTTPTransport(forHTTPS)))
-	require.Error(t, Register(WithHTTPTransport(forHTTPS), WithSchemeHTTP("uhttp")))
+	require.NoError(t, Register(WithHTTPTransport(upstreamHTTPS)))
+	require.Error(t, Register(WithHTTPTransport(upstreamHTTPS), WithSchemeHTTP("uhttp")))
 }
 
 func TestTransport(t *testing.T) {
