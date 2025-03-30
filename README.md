@@ -101,4 +101,5 @@ func main() {
     // Output:
     // Response status code: 200
     // Is message sent by server equal to message received by client: true
+}
 ```
