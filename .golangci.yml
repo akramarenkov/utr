@@ -1,0 +1,154 @@
+---
+version: "2"
+
+linters:
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - containedctx
+    - copyloopvar
+    - decorder
+    - dupword
+    - err113
+    - errcheck
+    - errname
+    - errorlint
+    - exptostd
+    - fatcontext
+    - forbidigo
+    - forcetypeassert
+    - gocheckcompilerdirectives
+    - gochecknoglobals
+    - gochecknoinits
+    - gochecksumtype
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - goheader
+    - gosec
+    - govet
+    - grouper
+    - iface
+    - inamedparam
+    - ineffassign
+    - interfacebloat
+    - intrange
+    - lll
+    - maintidx
+    - makezero
+    - mirror
+    - misspell
+    - mnd
+    - musttag
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnesserr
+    - nilnil
+    - nolintlint
+    - nonamedreturns
+    - nosprintfhostport
+    - perfsprint
+    - prealloc
+    - predeclared
+    - protogetter
+    - reassign
+    - recvcheck
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - tagalign
+    - tagliatelle
+    - testableexamples
+    - testifylint
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - usetesting
+    - wastedassign
+    - whitespace
+    - wsl
+    - zerologlint
+
+  settings:
+    gocritic:
+      enable-all: true
+      disabled-checks:
+        - emptyStringTest # not more idiomatically
+        - unnamedResult # named returns are more confusing
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment # creates a lot of irrelevant remarks
+        - shadow # causes too many false positives
+    revive:
+      enable-all-rules: true
+      rules:
+        - name: add-constant
+          disabled: true # mnd is used instead
+        - name: cognitive-complexity
+          disabled: true # gocognit, gocyclo, maintidx, nestif is used instead
+        - name: confusing-naming
+          disabled: true # needs to be enabled in the future
+        - name: confusing-results
+          disabled: true # named returns are more confusing
+        - name: cyclomatic
+          disabled: true # gocognit, gocyclo, maintidx, nestif is used instead
+        - name: flag-parameter
+          disabled: true # causes too many false positives
+        - name: function-length
+          disabled: true # gocognit, gocyclo, maintidx, nestif is used instead
+        - name: function-result-limit
+          disabled: true # gocritic is used instead
+        - name: line-length-limit
+          disabled: true # lll is used instead
+        - name: max-control-nesting
+          disabled: true # gocognit, gocyclo, maintidx, nestif is used instead
+        - name: argument-limit
+          arguments:
+            - 10 # try to decrease in the future
+        - name: unhandled-error
+          arguments:
+            - fmt\.Print.* # writing errors in stdout and stderr is difficult to report in any way
+            - bytes\.Buffer\.Write.* # always returns nil
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - localmodule
+        - default
+      custom-order: true
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
