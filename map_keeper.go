@@ -11,36 +11,36 @@ type MapKeeper struct {
 	table sync.Map
 }
 
-// Adds mapping of name and path to Unix socket.
-func (mkr *MapKeeper) AddPath(host, path string) error {
-	if err := isValidHost(host); err != nil {
+// Adds mapping of hostname and path to Unix socket.
+func (mkr *MapKeeper) AddPath(hostname, path string) error {
+	if err := isValidHostname(hostname); err != nil {
 		return err
 	}
 
-	if prev, exists := mkr.table.LoadOrStore(host, path); exists {
+	if prev, exists := mkr.table.LoadOrStore(hostname, path); exists {
 		if prev != path {
-			return ErrHostAlreadyExists
+			return ErrHostnameAlreadyExists
 		}
 	}
 
 	return nil
 }
 
-func isValidHost(host string) error {
+func isValidHostname(hostname string) error {
 	origin := url.URL{
-		Host: host,
+		Host: hostname,
 	}
 
 	if _, err := url.Parse(origin.String()); err != nil {
-		return fmt.Errorf("%w: %w", ErrHostInvalid, err)
+		return fmt.Errorf("%w: %w", ErrHostnameInvalid, err)
 	}
 
 	return nil
 }
 
-// Resolves path to Unix socket by name.
-func (mkr *MapKeeper) LookupPath(host string) (string, error) {
-	path, exists := mkr.table.Load(host)
+// Resolves path to Unix socket by hostname.
+func (mkr *MapKeeper) LookupPath(hostname string) (string, error) {
+	path, exists := mkr.table.Load(hostname)
 	if !exists {
 		return "", ErrPathNotFound
 	}

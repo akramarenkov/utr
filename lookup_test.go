@@ -8,12 +8,14 @@ import (
 )
 
 func TestDefaultKeeper(t *testing.T) {
-	require.Error(t, AddPath("/"+testHostname, testSocketPath))
+	wrongHostname := "/" + testHostname
+
+	require.Error(t, AddPath(wrongHostname, testSocketPath))
 	require.NoError(t, AddPath(testHostname, testSocketPath))
 	require.NoError(t, AddPath(testHostname, testSocketPath))
 	require.Error(t, AddPath(testHostname, filepath.Join("dir", testSocketPath)))
 
-	path, err := LookupPath("/" + testHostname)
+	path, err := LookupPath(wrongHostname)
 	require.Error(t, err)
 	require.Empty(t, path)
 

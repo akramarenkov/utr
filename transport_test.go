@@ -175,14 +175,14 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	require.Equal(t, message, output)
 	require.NoError(t, resp.Body.Close())
 
-	requestURLWrongHost := url.URL{
+	requestURLWrongHostname := url.URL{
 		Scheme: DefaultSchemeHTTP,
 		Host:   testHostname + testHostname,
 		Path:   requestPath,
 	}
 
 	//nolint:bodyclose // False positive
-	resp, err = client.Get(requestURLWrongHost.String())
+	resp, err = client.Get(requestURLWrongHostname.String())
 	require.Error(t, err)
 	require.Nil(t, resp)
 
@@ -288,14 +288,14 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	require.Equal(t, message, output)
 	require.NoError(t, resp.Body.Close())
 
-	requestURLWrongHost := url.URL{
+	requestURLWrongHostname := url.URL{
 		Scheme: DefaultSchemeHTTPS,
 		Host:   testHostname + testHostname,
 		Path:   requestPath,
 	}
 
 	//nolint:bodyclose // False positive
-	resp, err = client.Get(requestURLWrongHost.String())
+	resp, err = client.Get(requestURLWrongHostname.String())
 	require.Error(t, err)
 	require.Nil(t, resp)
 
@@ -411,7 +411,7 @@ func genCA(
 
 func genNodeTLSCert(
 	t *testing.T,
-	hostTempl *x509.Certificate,
+	nodeTempl *x509.Certificate,
 	keySize int,
 	caTempl *x509.Certificate,
 	caKey *rsa.PrivateKey,
@@ -419,7 +419,7 @@ func genNodeTLSCert(
 	key, err := rsa.GenerateKey(rand.Reader, keySize)
 	require.NoError(t, err)
 
-	cert, err := x509.CreateCertificate(rand.Reader, hostTempl, caTempl, &key.PublicKey, caKey)
+	cert, err := x509.CreateCertificate(rand.Reader, nodeTempl, caTempl, &key.PublicKey, caKey)
 	require.NoError(t, err)
 
 	tlsCert := tls.Certificate{

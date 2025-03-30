@@ -12,12 +12,14 @@ import (
 func TestMapKeeper(t *testing.T) {
 	var keeper MapKeeper
 
-	require.Error(t, keeper.AddPath("/"+testHostname, testSocketPath))
+	wrongHostname := "/" + testHostname
+
+	require.Error(t, keeper.AddPath(wrongHostname, testSocketPath))
 	require.NoError(t, keeper.AddPath(testHostname, testSocketPath))
 	require.NoError(t, keeper.AddPath(testHostname, testSocketPath))
 	require.Error(t, keeper.AddPath(testHostname, filepath.Join("dir", testSocketPath)))
 
-	path, err := keeper.LookupPath("/" + testHostname)
+	path, err := keeper.LookupPath(wrongHostname)
 	require.Error(t, err)
 	require.Empty(t, path)
 
@@ -30,9 +32,9 @@ func BenchmarkAddPathReference(b *testing.B) {
 	table := make(map[string]string)
 
 	for id := range b.N {
-		host := testHostname + strconv.Itoa(id)
+		hostname := testHostname + strconv.Itoa(id)
 
-		table[host] = testSocketPath
+		table[hostname] = testSocketPath
 	}
 }
 
@@ -40,9 +42,9 @@ func BenchmarkMapKeeperAddPath(b *testing.B) {
 	var keeper MapKeeper
 
 	for id := range b.N {
-		host := testHostname + strconv.Itoa(id)
+		hostname := testHostname + strconv.Itoa(id)
 
-		if err := keeper.AddPath(host, testSocketPath); err != nil {
+		if err := keeper.AddPath(hostname, testSocketPath); err != nil {
 			require.NoError(b, err)
 		}
 	}
@@ -99,9 +101,9 @@ func BenchmarkRaceMapKeeper(b *testing.B) {
 						continue
 					}
 
-					host := testHostname + strconv.FormatInt(id, 10)
+					hostname := testHostname + strconv.FormatInt(id, 10)
 
-					if err := keeper.AddPath(host, testSocketPath); err != nil {
+					if err := keeper.AddPath(hostname, testSocketPath); err != nil {
 						require.NoError(b, err)
 					}
 				}

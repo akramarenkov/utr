@@ -1,13 +1,13 @@
 package utr
 
-// Collects mappings of names and paths to Unix sockets.
+// Collects mappings of hostnames and paths to Unix sockets.
 type Collector interface {
-	AddPath(host, path string) error
+	AddPath(hostname, path string) error
 }
 
-// Resolves path to Unix socket by name.
+// Resolves path to Unix socket by hostname.
 type Resolver interface {
-	LookupPath(host string) (string, error)
+	LookupPath(hostname string) (string, error)
 }
 
 // Combines [Collector] and [Resolver].
@@ -19,12 +19,12 @@ type Keeper interface {
 //nolint:gochecknoglobals // For convenience, the variable itself is thread-safe.
 var defaultKeeper Keeper = &MapKeeper{}
 
-// Adds mapping of name and path to Unix socket using global [Keeper].
-func AddPath(host, path string) error {
-	return defaultKeeper.AddPath(host, path)
+// Adds mapping of hostname and path to Unix socket using global [Keeper].
+func AddPath(hostname, path string) error {
+	return defaultKeeper.AddPath(hostname, path)
 }
 
-// Resolves path to Unix socket by name using global [Keeper].
-func LookupPath(host string) (string, error) {
-	return defaultKeeper.LookupPath(host)
+// Resolves path to Unix socket by hostname using global [Keeper].
+func LookupPath(hostname string) (string, error) {
+	return defaultKeeper.LookupPath(hostname)
 }

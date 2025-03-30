@@ -204,9 +204,9 @@ func (trt *Transport) replaceScheme(request *http.Request) {
 func (trt *Transport) dial(ctx context.Context, _, addr string) (net.Conn, error) {
 	// There is no need and possibility to test the formation of the address in
 	// the transport from the net/http package
-	host, _, _ := net.SplitHostPort(addr)
+	hostname, _, _ := net.SplitHostPort(addr)
 
-	path, err := trt.resolver.LookupPath(host)
+	path, err := trt.resolver.LookupPath(hostname)
 	if err != nil {
 		return nil, err
 	}
@@ -217,9 +217,9 @@ func (trt *Transport) dial(ctx context.Context, _, addr string) (net.Conn, error
 func (trt *Transport) dialTLS(ctx context.Context, _, addr string) (net.Conn, error) {
 	// There is no need and possibility to test the formation of the address in
 	// the transport from the net/http package
-	host, _, _ := net.SplitHostPort(addr)
+	hostname, _, _ := net.SplitHostPort(addr)
 
-	path, err := trt.resolver.LookupPath(host)
+	path, err := trt.resolver.LookupPath(hostname)
 	if err != nil {
 		return nil, err
 	}
