@@ -110,7 +110,7 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 // The upstream [http.Transport] must be set using [WithHTTPDefaultTransport] or
 // [WithHTTPTransport] functions.
 //
-// If the path by name resolver is not set using [WithResolver] function the package-wide
+// If the path by name resolver is not set using [WithResolver] function the global
 // [Keeper] will be used. In this case, the mapping of the name and path to the Unix
 // socket can be added using the [AddPath] function.
 //
