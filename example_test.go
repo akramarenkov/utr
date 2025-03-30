@@ -20,8 +20,6 @@ func Example() {
 		socketPath  = "service.sock"
 	)
 
-	var router http.ServeMux
-
 	message := []byte("example message")
 
 	if err := utr.Register(utr.WithHTTPDefaultTransport()); err != nil {
@@ -36,6 +34,8 @@ func Example() {
 	if err != nil {
 		panic(err)
 	}
+
+	var router http.ServeMux
 
 	router.HandleFunc(
 		requestPath,
