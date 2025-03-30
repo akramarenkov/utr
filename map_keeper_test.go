@@ -38,7 +38,7 @@ func BenchmarkAddPathReference(b *testing.B) {
 	}
 }
 
-func BenchmarkMapKeeperAddPath(b *testing.B) {
+func BenchmarkAddPathMapKeeper(b *testing.B) {
 	var keeper MapKeeper
 
 	for id := range b.N {
@@ -62,7 +62,7 @@ func BenchmarkLookupPathReference(b *testing.B) {
 	}
 }
 
-func BenchmarkMapKeeperLookupPath(b *testing.B) {
+func BenchmarkLookupPathMapKeeper(b *testing.B) {
 	var keeper MapKeeper
 
 	require.NoError(b, keeper.AddPath(testHostname, testSocketPath))
