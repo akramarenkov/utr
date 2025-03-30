@@ -65,6 +65,7 @@ func main() {
     }
 
     faults := make(chan error)
+    defer close(faults)
 
     defer func() {
         ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
