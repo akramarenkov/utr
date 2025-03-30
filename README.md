@@ -72,7 +72,7 @@ func main() {
 
         err := server.Shutdown(ctx)
         fmt.Println("Server shutdown error:", err)
-        fmt.Println("Server terminated normally:", errors.Is(<-faults, http.ErrServerClosed))
+        fmt.Println("Is server terminated normally:", errors.Is(<-faults, http.ErrServerClosed))
     }()
 
     go func() {
@@ -98,6 +98,6 @@ func main() {
     // Response status code: 200
     // Is received message equal to sent one: true
     // Server shutdown error: <nil>
-    // Server terminated normally: true
+    // Is server terminated normally: true
 }
 ```
