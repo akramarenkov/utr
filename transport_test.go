@@ -444,7 +444,7 @@ func BenchmarkTransport(b *testing.B) {
 
 	router.HandleFunc(
 		requestPath,
-		func(w http.ResponseWriter, r *http.Request) {
+		func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		},
 	)
