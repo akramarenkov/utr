@@ -138,6 +138,7 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	}
 
 	faults := make(chan error)
+	defer close(faults)
 
 	defer func() {
 		require.NoError(t, server.Shutdown(t.Context()))
@@ -250,6 +251,7 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	}
 
 	faults := make(chan error)
+	defer close(faults)
 
 	defer func() {
 		require.NoError(t, server.Shutdown(t.Context()))
