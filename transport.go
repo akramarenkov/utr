@@ -52,7 +52,7 @@ func WithHTTPTransport(transport *http.Transport) Adjuster {
 	return adjust(adj)
 }
 
-// Sets path by name resolver for Unix socket transport.
+// Sets path by hostname resolver for Unix socket transport.
 func WithResolver(resolver Resolver) Adjuster {
 	adj := func(trt *Transport) error {
 		if resolver == nil {
@@ -110,8 +110,8 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 // The upstream [http.Transport] must be set using [WithHTTPDefaultTransport] or
 // [WithHTTPTransport] functions.
 //
-// If the path by name resolver is not set using [WithResolver] function the global
-// [Keeper] will be used. In this case, the mapping of the name and path to the Unix
+// If the path by hostname resolver is not set using [WithResolver] function the global
+// [Keeper] will be used. In this case, the mapping of the hostname and path to the Unix
 // socket can be added using the [AddPath] function.
 //
 // If URL schemes for operation HTTP and HTTPS via Unix socket are not set using
