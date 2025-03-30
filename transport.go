@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// Unix socket transport.
 type Transport struct {
 	base        *http.Transport
 	resolver    Resolver
@@ -18,6 +19,8 @@ type Transport struct {
 	tlsDialer tls.Dialer
 }
 
+// Sets the [http.DefaultTransport] as the upstream [http.Transport] for Unix socket
+// transport.
 func WithHTTPDefaultTransport() Adjuster {
 	adj := func(trt *Transport) error {
 		def, casted := http.DefaultTransport.(*http.Transport)
@@ -33,6 +36,8 @@ func WithHTTPDefaultTransport() Adjuster {
 	return adjust(adj)
 }
 
+// Sets the specified transport as the upstream [http.Transport] for Unix socket
+// transport.
 func WithHTTPTransport(transport *http.Transport) Adjuster {
 	adj := func(trt *Transport) error {
 		if transport == nil {
@@ -47,6 +52,7 @@ func WithHTTPTransport(transport *http.Transport) Adjuster {
 	return adjust(adj)
 }
 
+// Sets path resolver for Unix socket transport for Unix socket transport.
 func WithResolver(resolver Resolver) Adjuster {
 	adj := func(trt *Transport) error {
 		if resolver == nil {
@@ -61,6 +67,7 @@ func WithResolver(resolver Resolver) Adjuster {
 	return adjust(adj)
 }
 
+// Sets URL scheme for operation with HTTP via Unix socket for Unix socket transport.
 func WithSchemeHTTP(scheme string) Adjuster {
 	adj := func(trt *Transport) error {
 		if scheme == "" {
@@ -79,6 +86,7 @@ func WithSchemeHTTP(scheme string) Adjuster {
 	return adjust(adj)
 }
 
+// Sets URL scheme for operation with HTTPS via Unix socket for Unix socket transport.
 func WithSchemeHTTPS(scheme string) Adjuster {
 	adj := func(trt *Transport) error {
 		if scheme == "" {
@@ -97,6 +105,20 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 	return adjust(adj)
 }
 
+// Creates and registers new Unix socket transport.
+//
+// The upstream [http.Transport] must be set using [WithHTTPDefaultTransport] or
+// [WithHTTPTransport] functions.
+//
+// If the path resolver is not set using [WithResolver] function the package-wide
+// resolver will be used. In this case, the mapping of the name and path to the Unix
+// socket can be added using the [AddPath] function.
+//
+// If URL schemes for operation HTTP and HTTPS over Unix socket are not set using
+// [WithSchemeHTTP] and [WithSchemeHTTPS] functions, then URL schemes
+// [DefaultSchemeHTTP] and [DefaultSchemeHTTPS] will be used.
+// Multiple Unix socket transports with the same URL schemes cannot be registered
+// for one upstream [http.Transport].
 func Register(opts ...Adjuster) error {
 	trt := &Transport{}
 
