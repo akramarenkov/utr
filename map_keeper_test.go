@@ -30,7 +30,9 @@ func BenchmarkAddPathReference(b *testing.B) {
 	table := make(map[string]string)
 
 	for id := range b.N {
-		table[testHostname+strconv.Itoa(id)] = testSocketPath
+		host := testHostname + strconv.Itoa(id)
+
+		table[host] = testSocketPath
 	}
 }
 
@@ -38,7 +40,9 @@ func BenchmarkMapKeeperAddPath(b *testing.B) {
 	var keeper MapKeeper
 
 	for id := range b.N {
-		if err := keeper.AddPath(testHostname+strconv.Itoa(id), testSocketPath); err != nil {
+		host := testHostname + strconv.Itoa(id)
+
+		if err := keeper.AddPath(host, testSocketPath); err != nil {
 			require.NoError(b, err)
 		}
 	}
@@ -95,9 +99,9 @@ func BenchmarkRaceMapKeeper(b *testing.B) {
 						continue
 					}
 
-					path := testHostname + strconv.FormatInt(id, 10)
+					host := testHostname + strconv.FormatInt(id, 10)
 
-					if err := keeper.AddPath(path, testSocketPath); err != nil {
+					if err := keeper.AddPath(host, testSocketPath); err != nil {
 						require.NoError(b, err)
 					}
 				}
