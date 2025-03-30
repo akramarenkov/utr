@@ -15,8 +15,8 @@ type Transport struct {
 	schemeHTTP  string
 	schemeHTTPS string
 
-	dialer    net.Dialer
-	tlsDialer tls.Dialer
+	dialer    *net.Dialer
+	tlsDialer *tls.Dialer
 }
 
 // Sets the [http.DefaultTransport] as the upstream [http.Transport] for Unix socket
@@ -120,7 +120,9 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 // transports with the same URL schemes cannot be registered for one upstream
 // [http.Transport].
 func Register(opts ...Adjuster) error {
-	trt := &Transport{}
+	trt := &Transport{
+		dialer: &net.Dialer{},
+	}
 
 	for _, adj := range opts {
 		if err := adj.adjust(trt); err != nil {
@@ -144,7 +146,7 @@ func Register(opts ...Adjuster) error {
 		trt.schemeHTTPS = DefaultSchemeHTTPS
 	}
 
-	trt.tlsDialer = tls.Dialer{
+	trt.tlsDialer = &tls.Dialer{
 		Config: trt.base.TLSClientConfig,
 	}
 
