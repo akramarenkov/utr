@@ -168,7 +168,15 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		Path:   requestPath,
 	}
 
-	resp, err := client.Get(requestURL.String())
+	request, err := http.NewRequestWithContext(
+		t.Context(),
+		http.MethodGet,
+		requestURL.String(),
+		http.NoBody,
+	)
+	require.NoError(t, err)
+
+	resp, err := client.Do(request)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -183,8 +191,16 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		Path:   requestPath,
 	}
 
+	request, err = http.NewRequestWithContext(
+		t.Context(),
+		http.MethodGet,
+		requestURLWrongHostname.String(),
+		http.NoBody,
+	)
+	require.NoError(t, err)
+
 	//nolint:bodyclose // False positive
-	resp, err = client.Get(requestURLWrongHostname.String())
+	resp, err = client.Do(request)
 	require.Error(t, err)
 	require.Nil(t, resp)
 
@@ -283,7 +299,15 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		Path:   requestPath,
 	}
 
-	resp, err := client.Get(requestURL.String())
+	request, err := http.NewRequestWithContext(
+		t.Context(),
+		http.MethodGet,
+		requestURL.String(),
+		http.NoBody,
+	)
+	require.NoError(t, err)
+
+	resp, err := client.Do(request)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -298,8 +322,16 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		Path:   requestPath,
 	}
 
+	request, err = http.NewRequestWithContext(
+		t.Context(),
+		http.MethodGet,
+		requestURLWrongHostname.String(),
+		http.NoBody,
+	)
+	require.NoError(t, err)
+
 	//nolint:bodyclose // False positive
-	resp, err = client.Get(requestURLWrongHostname.String())
+	resp, err = client.Do(request)
 	require.Error(t, err)
 	require.Nil(t, resp)
 

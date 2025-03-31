@@ -60,7 +60,17 @@ func BenchmarkTransport(b *testing.B) {
 	requestURLString := requestURL.String()
 
 	for b.Loop() {
-		resp, err := client.Get(requestURLString)
+		request, err := http.NewRequestWithContext(
+			b.Context(),
+			http.MethodGet,
+			requestURLString,
+			http.NoBody,
+		)
+		if err != nil {
+			require.NoError(b, err)
+		}
+
+		resp, err := client.Do(request)
 		if err != nil {
 			require.NoError(b, err)
 		}
