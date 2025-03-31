@@ -25,7 +25,7 @@ func WithHTTPDefaultTransport() Adjuster {
 	adj := func(trt *Transport) error {
 		def, casted := http.DefaultTransport.(*http.Transport)
 		if !casted {
-			return ErrDefaultHTTPTransportInvalid
+			return ErrHTTPDefaultTransportInvalid
 		}
 
 		trt.base = def

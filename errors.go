@@ -3,9 +3,9 @@ package utr
 import "errors"
 
 var (
-	ErrDefaultHTTPTransportInvalid = errors.New("default http transport is not an http transport")
 	ErrHostnameAlreadyExists       = errors.New("hostname is already exists")
 	ErrHostnameInvalid             = errors.New("hostname is invalid")
+	ErrHTTPDefaultTransportInvalid = errors.New("http default transport is not an http transport")
 	ErrHTTPTransportEmpty          = errors.New("http transport is not specified")
 	ErrPathNotFound                = errors.New("path not found")
 	ErrResolverEmpty               = errors.New("resolver is not specified")
