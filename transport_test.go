@@ -107,10 +107,10 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	const requestPath = "/request/path"
 
 	var (
-		keeper              MapKeeper
-		protocolsInRequests sync.Map
-		protos              http.Protocols
-		router              http.ServeMux
+		keeper     MapKeeper
+		protos     http.Protocols
+		router     http.ServeMux
+		usedProtos sync.Map
 	)
 
 	message := prepareMessage(t)
@@ -121,7 +121,7 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	router.HandleFunc(
 		requestPath,
 		func(w http.ResponseWriter, r *http.Request) {
-			protocolsInRequests.Store(r.Proto, struct{}{})
+			usedProtos.Store(r.Proto, struct{}{})
 
 			_, _ = w.Write(message)
 		},
@@ -204,12 +204,12 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	require.Error(t, err)
 	require.Nil(t, resp)
 
-	protocolsInRequests.Range(
+	usedProtos.Range(
 		func(key any, _ any) bool {
 			if useHTTP2 {
-				require.Equal(t, "HTTP/2.0", key)
+				require.Equal(t, http2Proto, key)
 			} else {
-				require.Equal(t, "HTTP/1.1", key)
+				require.Equal(t, http1Proto, key)
 			}
 
 			return true
@@ -230,9 +230,9 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	const requestPath = "/request/path"
 
 	var (
-		keeper              MapKeeper
-		protocolsInRequests sync.Map
-		router              http.ServeMux
+		keeper     MapKeeper
+		usedProtos sync.Map
+		router     http.ServeMux
 	)
 
 	message := prepareMessage(t)
@@ -255,7 +255,7 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	router.HandleFunc(
 		requestPath,
 		func(w http.ResponseWriter, r *http.Request) {
-			protocolsInRequests.Store(r.Proto, struct{}{})
+			usedProtos.Store(r.Proto, struct{}{})
 
 			_, _ = w.Write(message)
 		},
@@ -335,12 +335,12 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	require.Error(t, err)
 	require.Nil(t, resp)
 
-	protocolsInRequests.Range(
+	usedProtos.Range(
 		func(key any, _ any) bool {
 			if useHTTP2 {
-				require.Equal(t, "HTTP/2.0", key)
+				require.Equal(t, http2Proto, key)
 			} else {
-				require.Equal(t, "HTTP/1.1", key)
+				require.Equal(t, http1Proto, key)
 			}
 
 			return true
