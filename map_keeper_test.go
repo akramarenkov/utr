@@ -10,16 +10,19 @@ import (
 )
 
 func TestMapKeeper(t *testing.T) {
-	var keeper MapKeeper
+	const (
+		wrongHostname       = "/" + testHostname
+		nonexistentHostname = testHostname + testHostname
+	)
 
-	wrongHostname := "/" + testHostname
+	var keeper MapKeeper
 
 	require.Error(t, keeper.AddPath(wrongHostname, testSocketPath))
 	require.NoError(t, keeper.AddPath(testHostname, testSocketPath))
 	require.NoError(t, keeper.AddPath(testHostname, testSocketPath))
 	require.Error(t, keeper.AddPath(testHostname, filepath.Join("dir", testSocketPath)))
 
-	path, err := keeper.LookupPath(wrongHostname)
+	path, err := keeper.LookupPath(nonexistentHostname)
 	require.Error(t, err)
 	require.Empty(t, path)
 

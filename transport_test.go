@@ -185,7 +185,7 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	require.Equal(t, message, output)
 	require.NoError(t, resp.Body.Close())
 
-	requestURLWrongHostname := url.URL{
+	requestURLNonexistentHostname := url.URL{
 		Scheme: DefaultSchemeHTTP,
 		Host:   testHostname + testHostname,
 		Path:   requestPath,
@@ -194,7 +194,7 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	request, err = http.NewRequestWithContext(
 		t.Context(),
 		http.MethodGet,
-		requestURLWrongHostname.String(),
+		requestURLNonexistentHostname.String(),
 		http.NoBody,
 	)
 	require.NoError(t, err)
@@ -316,7 +316,7 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	require.Equal(t, message, output)
 	require.NoError(t, resp.Body.Close())
 
-	requestURLWrongHostname := url.URL{
+	requestURLNonexistentHostname := url.URL{
 		Scheme: DefaultSchemeHTTPS,
 		Host:   testHostname + testHostname,
 		Path:   requestPath,
@@ -325,7 +325,7 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	request, err = http.NewRequestWithContext(
 		t.Context(),
 		http.MethodGet,
-		requestURLWrongHostname.String(),
+		requestURLNonexistentHostname.String(),
 		http.NoBody,
 	)
 	require.NoError(t, err)
