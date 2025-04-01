@@ -9,13 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMapKeeper(t *testing.T) {
+func TestKeeper(t *testing.T) {
 	const (
 		wrongHostname       = "/" + testHostname
 		nonexistentHostname = testHostname + testHostname
 	)
 
-	var keeper MapKeeper
+	var keeper Keeper
 
 	require.Error(t, keeper.AddPath(wrongHostname, testSocketPath))
 	require.NoError(t, keeper.AddPath(testHostname, testSocketPath))
@@ -41,8 +41,8 @@ func BenchmarkAddPathReference(b *testing.B) {
 	}
 }
 
-func BenchmarkAddPathMapKeeper(b *testing.B) {
-	var keeper MapKeeper
+func BenchmarkAddPathKeeper(b *testing.B) {
+	var keeper Keeper
 
 	for id := range b.N {
 		hostname := testHostname + strconv.Itoa(id)
@@ -65,8 +65,8 @@ func BenchmarkLookupPathReference(b *testing.B) {
 	}
 }
 
-func BenchmarkLookupPathMapKeeper(b *testing.B) {
-	var keeper MapKeeper
+func BenchmarkLookupPathKeeper(b *testing.B) {
+	var keeper Keeper
 
 	require.NoError(b, keeper.AddPath(testHostname, testSocketPath))
 
@@ -82,9 +82,9 @@ func BenchmarkLookupPathMapKeeper(b *testing.B) {
 	}
 }
 
-func BenchmarkRaceMapKeeper(b *testing.B) {
+func BenchmarkRaceKeeper(b *testing.B) {
 	var (
-		keeper  MapKeeper
+		keeper  Keeper
 		counter atomic.Int64
 	)
 

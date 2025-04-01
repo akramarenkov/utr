@@ -75,14 +75,14 @@ func TestRegister(t *testing.T) {
 	upstreamHTTPS := &http.Transport{}
 
 	require.Error(t, Register(nil))
-	require.Error(t, Register(&MapKeeper{}))
-	require.Error(t, Register(&MapKeeper{}, WithHTTPTransport(nil)))
+	require.Error(t, Register(&Keeper{}))
+	require.Error(t, Register(&Keeper{}, WithHTTPTransport(nil)))
 
-	require.NoError(t, Register(&MapKeeper{}, WithHTTPTransport(upstreamHTTP)))
-	require.Error(t, Register(&MapKeeper{}, WithHTTPTransport(upstreamHTTP)))
+	require.NoError(t, Register(&Keeper{}, WithHTTPTransport(upstreamHTTP)))
+	require.Error(t, Register(&Keeper{}, WithHTTPTransport(upstreamHTTP)))
 
-	require.NoError(t, Register(&MapKeeper{}, WithHTTPTransport(upstreamHTTPS)))
-	require.Error(t, Register(&MapKeeper{}, WithHTTPTransport(upstreamHTTPS), WithSchemeHTTP("uhttp")))
+	require.NoError(t, Register(&Keeper{}, WithHTTPTransport(upstreamHTTPS)))
+	require.Error(t, Register(&Keeper{}, WithHTTPTransport(upstreamHTTPS), WithSchemeHTTP("uhttp")))
 }
 
 func TestTransport(t *testing.T) {
@@ -98,7 +98,7 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	const requestPath = "/request/path"
 
 	var (
-		keeper     MapKeeper
+		keeper     Keeper
 		protos     http.Protocols
 		router     http.ServeMux
 		usedProtos sync.Map
@@ -221,7 +221,7 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	const requestPath = "/request/path"
 
 	var (
-		keeper     MapKeeper
+		keeper     Keeper
 		usedProtos sync.Map
 		router     http.ServeMux
 	)

@@ -92,7 +92,7 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 
 // Creates and registers new Unix socket transport.
 //
-// The path by hostname resolver must be set. [MapKeeper] can be used as it.
+// The path by hostname resolver must be set. [Keeper] can be used as it.
 //
 // The upstream [http.Transport] must be set using [WithHTTPDefaultTransport] or
 // [WithHTTPTransport] functions.

@@ -17,7 +17,7 @@ func BenchmarkTransport(b *testing.B) {
 	require.NoError(b, err)
 
 	var (
-		keeper MapKeeper
+		keeper Keeper
 		router http.ServeMux
 	)
 

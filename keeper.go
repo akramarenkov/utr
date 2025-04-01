@@ -6,18 +6,18 @@ import (
 	"sync"
 )
 
-// Keeper using [sync.Map].
-type MapKeeper struct {
+// Keeps and resolves mappings of hostnames and paths to Unix sockets.
+type Keeper struct {
 	table sync.Map
 }
 
 // Adds mapping of hostname and path to Unix socket.
-func (mkr *MapKeeper) AddPath(hostname, path string) error {
+func (kpr *Keeper) AddPath(hostname, path string) error {
 	if err := isValidHostname(hostname); err != nil {
 		return err
 	}
 
-	if prev, exists := mkr.table.LoadOrStore(hostname, path); exists {
+	if prev, exists := kpr.table.LoadOrStore(hostname, path); exists {
 		if prev != path {
 			return ErrHostnameAlreadyExists
 		}
@@ -39,8 +39,8 @@ func isValidHostname(hostname string) error {
 }
 
 // Resolves path to Unix socket by hostname.
-func (mkr *MapKeeper) LookupPath(hostname string) (string, error) {
-	path, exists := mkr.table.Load(hostname)
+func (kpr *Keeper) LookupPath(hostname string) (string, error) {
+	path, exists := kpr.table.Load(hostname)
 	if !exists {
 		return "", ErrPathNotFound
 	}

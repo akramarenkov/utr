@@ -72,7 +72,7 @@ func main() {
         faults <- server.Serve(listener)
     }()
 
-    var keeper utr.MapKeeper
+    var keeper utr.Keeper
 
     if err := utr.Register(&keeper, utr.WithHTTPDefaultTransport()); err != nil {
         panic(err)
