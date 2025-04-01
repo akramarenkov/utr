@@ -134,6 +134,18 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	defer func() {
 		require.NoError(t, server.Shutdown(t.Context()))
 		require.Equal(t, http.ErrServerClosed, <-faults)
+
+		usedProtos.Range(
+			func(key any, _ any) bool {
+				if useHTTP2 {
+					require.Equal(t, http2Proto, key)
+				} else {
+					require.Equal(t, http1Proto, key)
+				}
+
+				return true
+			},
+		)
 	}()
 
 	go func() {
@@ -194,18 +206,6 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	resp, err = client.Do(request)
 	require.Error(t, err)
 	require.Nil(t, resp)
-
-	usedProtos.Range(
-		func(key any, _ any) bool {
-			if useHTTP2 {
-				require.Equal(t, http2Proto, key)
-			} else {
-				require.Equal(t, http1Proto, key)
-			}
-
-			return true
-		},
-	)
 }
 
 func TestTransportTLS(t *testing.T) {
@@ -263,6 +263,18 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	defer func() {
 		require.NoError(t, server.Shutdown(t.Context()))
 		require.Equal(t, http.ErrServerClosed, <-faults)
+
+		usedProtos.Range(
+			func(key any, _ any) bool {
+				if useHTTP2 {
+					require.Equal(t, http2Proto, key)
+				} else {
+					require.Equal(t, http1Proto, key)
+				}
+
+				return true
+			},
+		)
 	}()
 
 	go func() {
@@ -325,18 +337,6 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	resp, err = client.Do(request)
 	require.Error(t, err)
 	require.Nil(t, resp)
-
-	usedProtos.Range(
-		func(key any, _ any) bool {
-			if useHTTP2 {
-				require.Equal(t, http2Proto, key)
-			} else {
-				require.Equal(t, http1Proto, key)
-			}
-
-			return true
-		},
-	)
 }
 
 func prepareMessage(t *testing.T) []byte {
