@@ -38,7 +38,10 @@ func main() {
         panic(err)
     }
 
-    var router http.ServeMux
+    var (
+        keeper utr.MapKeeper
+        router http.ServeMux
+    )
 
     router.HandleFunc(
         "/request/path",
@@ -72,11 +75,11 @@ func main() {
         faults <- server.Serve(listener)
     }()
 
-    if err := utr.Register(utr.WithHTTPDefaultTransport()); err != nil {
+    if err := utr.Register(&keeper, utr.WithHTTPDefaultTransport()); err != nil {
         panic(err)
     }
 
-    if err := utr.AddPath("service", socketPath); err != nil {
+    if err := keeper.AddPath("service", socketPath); err != nil {
         panic(err)
     }
 

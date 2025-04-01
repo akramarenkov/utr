@@ -52,21 +52,6 @@ func WithHTTPTransport(transport *http.Transport) Adjuster {
 	return adjust(adj)
 }
 
-// Sets path by hostname resolver for Unix socket transport.
-func WithResolver(resolver Resolver) Adjuster {
-	adj := func(trt *Transport) error {
-		if resolver == nil {
-			return ErrResolverEmpty
-		}
-
-		trt.resolver = resolver
-
-		return nil
-	}
-
-	return adjust(adj)
-}
-
 // Sets URL scheme for operation HTTP via Unix socket.
 func WithSchemeHTTP(scheme string) Adjuster {
 	adj := func(trt *Transport) error {
@@ -107,20 +92,24 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 
 // Creates and registers new Unix socket transport.
 //
+// The path by hostname resolver must be set. [MapKeeper] can be used as it.
+//
 // The upstream [http.Transport] must be set using [WithHTTPDefaultTransport] or
 // [WithHTTPTransport] functions.
-//
-// If the path by hostname resolver is not set using [WithResolver] function the global
-// [Keeper] will be used. In this case, the mapping of the hostname and path to the Unix
-// socket can be added using the [AddPath] function.
 //
 // If URL schemes for operation HTTP and HTTPS via Unix socket are not set using
 // [WithSchemeHTTP] and [WithSchemeHTTPS] functions, then URL schemes
 // [DefaultSchemeHTTP] and [DefaultSchemeHTTPS] will be used. Multiple Unix socket
 // transports with the same URL schemes cannot be registered for one upstream
 // [http.Transport].
-func Register(opts ...Adjuster) error {
+func Register(resolver Resolver, opts ...Adjuster) error {
+	if resolver == nil {
+		return ErrResolverEmpty
+	}
+
 	trt := &Transport{
+		resolver: resolver,
+
 		dialer: &net.Dialer{},
 	}
 
@@ -132,10 +121,6 @@ func Register(opts ...Adjuster) error {
 
 	if trt.base == nil {
 		return ErrHTTPTransportEmpty
-	}
-
-	if trt.resolver == nil {
-		trt.resolver = defaultKeeper
 	}
 
 	if trt.schemeHTTP == "" {

@@ -44,16 +44,6 @@ func TestWithHTTPTransport(t *testing.T) {
 	require.NotNil(t, trt.base)
 }
 
-func TestWithResolver(t *testing.T) {
-	trt := &Transport{}
-
-	require.Error(t, WithResolver(nil).adjust(trt))
-	require.Nil(t, trt.resolver)
-
-	require.NoError(t, WithResolver(&MapKeeper{}).adjust(trt))
-	require.NotNil(t, trt.resolver)
-}
-
 func TestWithSchemeHTTP(t *testing.T) {
 	trt := &Transport{}
 
@@ -84,14 +74,15 @@ func TestRegister(t *testing.T) {
 	upstreamHTTP := &http.Transport{}
 	upstreamHTTPS := &http.Transport{}
 
-	require.Error(t, Register())
-	require.Error(t, Register(WithHTTPTransport(nil)))
+	require.Error(t, Register(nil))
+	require.Error(t, Register(&MapKeeper{}))
+	require.Error(t, Register(&MapKeeper{}, WithHTTPTransport(nil)))
 
-	require.NoError(t, Register(WithHTTPTransport(upstreamHTTP)))
-	require.Error(t, Register(WithHTTPTransport(upstreamHTTP)))
+	require.NoError(t, Register(&MapKeeper{}, WithHTTPTransport(upstreamHTTP)))
+	require.Error(t, Register(&MapKeeper{}, WithHTTPTransport(upstreamHTTP)))
 
-	require.NoError(t, Register(WithHTTPTransport(upstreamHTTPS)))
-	require.Error(t, Register(WithHTTPTransport(upstreamHTTPS), WithSchemeHTTP("uhttp")))
+	require.NoError(t, Register(&MapKeeper{}, WithHTTPTransport(upstreamHTTPS)))
+	require.Error(t, Register(&MapKeeper{}, WithHTTPTransport(upstreamHTTPS), WithSchemeHTTP("uhttp")))
 }
 
 func TestTransport(t *testing.T) {
@@ -156,7 +147,7 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	}
 
 	require.NoError(t, keeper.AddPath(testHostname, socketPath))
-	require.NoError(t, Register(WithHTTPTransport(httpTransport), WithResolver(&keeper)))
+	require.NoError(t, Register(&keeper, WithHTTPTransport(httpTransport)))
 
 	client := &http.Client{
 		Transport: httpTransport,
@@ -287,7 +278,7 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	}
 
 	require.NoError(t, keeper.AddPath(testHostname, socketPath))
-	require.NoError(t, Register(WithHTTPTransport(httpTransport), WithResolver(&keeper)))
+	require.NoError(t, Register(&keeper, WithHTTPTransport(httpTransport)))
 
 	client := &http.Client{
 		Transport: httpTransport,

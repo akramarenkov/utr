@@ -15,16 +15,3 @@ type Keeper interface {
 	Collector
 	Resolver
 }
-
-//nolint:gochecknoglobals // For convenience, the variable itself is thread-safe.
-var defaultKeeper Keeper = &MapKeeper{}
-
-// Adds mapping of hostname and path to Unix socket using global [Keeper].
-func AddPath(hostname, path string) error {
-	return defaultKeeper.AddPath(hostname, path)
-}
-
-// Resolves path to Unix socket by hostname using global [Keeper].
-func LookupPath(hostname string) (string, error) {
-	return defaultKeeper.LookupPath(hostname)
-}
