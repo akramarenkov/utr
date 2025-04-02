@@ -19,28 +19,28 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestWithHTTPDefaultTransport(t *testing.T) {
+func TestWithDefaultTransport(t *testing.T) {
 	trt := &Transport{}
 
 	httpDefaultTransport := http.DefaultTransport
 	http.DefaultTransport = nil
 
-	require.Error(t, WithHTTPDefaultTransport().adjust(trt))
+	require.Error(t, WithDefaultTransport().adjust(trt))
 	require.Nil(t, trt.base)
 
 	http.DefaultTransport = httpDefaultTransport
 
-	require.NoError(t, WithHTTPDefaultTransport().adjust(trt))
+	require.NoError(t, WithDefaultTransport().adjust(trt))
 	require.NotNil(t, trt.base)
 }
 
-func TestWithHTTPTransport(t *testing.T) {
+func TestWithTransport(t *testing.T) {
 	trt := &Transport{}
 
-	require.Error(t, WithHTTPTransport(nil).adjust(trt))
+	require.Error(t, WithTransport(nil).adjust(trt))
 	require.Nil(t, trt.base)
 
-	require.NoError(t, WithHTTPTransport(&http.Transport{}).adjust(trt))
+	require.NoError(t, WithTransport(&http.Transport{}).adjust(trt))
 	require.NotNil(t, trt.base)
 }
 
@@ -76,13 +76,13 @@ func TestRegister(t *testing.T) {
 
 	require.Error(t, Register(nil))
 	require.Error(t, Register(&Keeper{}))
-	require.Error(t, Register(&Keeper{}, WithHTTPTransport(nil)))
+	require.Error(t, Register(&Keeper{}, WithTransport(nil)))
 
-	require.NoError(t, Register(&Keeper{}, WithHTTPTransport(upstreamHTTP)))
-	require.Error(t, Register(&Keeper{}, WithHTTPTransport(upstreamHTTP)))
+	require.NoError(t, Register(&Keeper{}, WithTransport(upstreamHTTP)))
+	require.Error(t, Register(&Keeper{}, WithTransport(upstreamHTTP)))
 
-	require.NoError(t, Register(&Keeper{}, WithHTTPTransport(upstreamHTTPS)))
-	require.Error(t, Register(&Keeper{}, WithHTTPTransport(upstreamHTTPS), WithSchemeHTTP("uhttp")))
+	require.NoError(t, Register(&Keeper{}, WithTransport(upstreamHTTPS)))
+	require.Error(t, Register(&Keeper{}, WithTransport(upstreamHTTPS), WithSchemeHTTP("uhttp")))
 }
 
 func TestTransport(t *testing.T) {
@@ -159,7 +159,7 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	}
 
 	require.NoError(t, keeper.AddPath(testHostname, socketPath))
-	require.NoError(t, Register(&keeper, WithHTTPTransport(httpTransport)))
+	require.NoError(t, Register(&keeper, WithTransport(httpTransport)))
 
 	client := &http.Client{
 		Transport: httpTransport,
@@ -290,7 +290,7 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	}
 
 	require.NoError(t, keeper.AddPath(testHostname, socketPath))
-	require.NoError(t, Register(&keeper, WithHTTPTransport(httpTransport)))
+	require.NoError(t, Register(&keeper, WithTransport(httpTransport)))
 
 	client := &http.Client{
 		Transport: httpTransport,

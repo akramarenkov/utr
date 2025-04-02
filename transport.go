@@ -21,11 +21,11 @@ type Transport struct {
 
 // Sets the [http.DefaultTransport] as the upstream [http.Transport] for Unix socket
 // transport.
-func WithHTTPDefaultTransport() Adjuster {
+func WithDefaultTransport() Adjuster {
 	adj := func(trt *Transport) error {
 		def, casted := http.DefaultTransport.(*http.Transport)
 		if !casted {
-			return ErrHTTPDefaultTransportInvalid
+			return ErrDefaultTransportInvalid
 		}
 
 		trt.base = def
@@ -38,10 +38,10 @@ func WithHTTPDefaultTransport() Adjuster {
 
 // Sets the specified transport as the upstream [http.Transport] for Unix socket
 // transport.
-func WithHTTPTransport(transport *http.Transport) Adjuster {
+func WithTransport(transport *http.Transport) Adjuster {
 	adj := func(trt *Transport) error {
 		if transport == nil {
-			return ErrHTTPTransportEmpty
+			return ErrTransportEmpty
 		}
 
 		trt.base = transport
@@ -90,12 +90,13 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 	return adjust(adj)
 }
 
-// Creates and registers new Unix socket transport.
+// Creates new Unix socket transport and registers it for upstream [http.Transport].
 //
-// The path by hostname resolver must be set. [Keeper] can be used as it.
+// The [Resolver] of paths to Unix sockets by hostnames must be set. [Keeper] can
+// be used as it.
 //
-// The upstream [http.Transport] must be set using [WithHTTPDefaultTransport] or
-// [WithHTTPTransport] functions.
+// The upstream [http.Transport] must be set using [WithDefaultTransport] or
+// [WithTransport] functions.
 //
 // If URL schemes for operation HTTP and HTTPS via Unix socket are not set using
 // [WithSchemeHTTP] and [WithSchemeHTTPS] functions, then URL schemes
@@ -120,7 +121,7 @@ func Register(resolver Resolver, opts ...Adjuster) error {
 	}
 
 	if trt.base == nil {
-		return ErrHTTPTransportEmpty
+		return ErrTransportEmpty
 	}
 
 	if trt.schemeHTTP == "" {

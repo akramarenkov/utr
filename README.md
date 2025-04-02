@@ -74,7 +74,7 @@ func main() {
 
     var keeper utr.Keeper
 
-    if err := utr.Register(&keeper, utr.WithHTTPDefaultTransport()); err != nil {
+    if err := utr.Register(&keeper, utr.WithDefaultTransport()); err != nil {
         panic(err)
     }
 
