@@ -91,6 +91,19 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 	return adjust(adj)
 }
 
+// Creates new Unix socket transport with upstream [http.Transport]. For Unix socket
+// schemes will be used a clone of an upstream [http.Transport], for other schemes
+// an upstream [http.Transport] will be used directly.
+//
+// The [Resolver] of paths to Unix sockets by hostnames must be set. [Keeper] can
+// be used as it.
+//
+// The upstream [http.Transport] must be set using [WithDefaultTransport] or
+// [WithTransport] functions.
+//
+// If URL schemes for operation HTTP and HTTPS via Unix socket are not set using
+// [WithSchemeHTTP] and [WithSchemeHTTPS] functions, then URL schemes
+// [DefaultSchemeHTTP] and [DefaultSchemeHTTPS] will be used.
 func New(resolver Resolver, opts ...Adjuster) (*Transport, error) {
 	if resolver == nil {
 		return nil, ErrResolverEmpty
@@ -132,7 +145,8 @@ func New(resolver Resolver, opts ...Adjuster) (*Transport, error) {
 	return trt, nil
 }
 
-// Creates new Unix socket transport and registers it for upstream [http.Transport].
+// Creates new Unix socket transport and registers it schemes for upstream
+// [http.Transport].
 //
 // The [Resolver] of paths to Unix sockets by hostnames must be set. [Keeper] can
 // be used as it.
