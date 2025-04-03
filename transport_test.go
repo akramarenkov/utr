@@ -220,12 +220,6 @@ func TestTransportTLSHTTP2(t *testing.T) {
 func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	const requestPath = "/request/path"
 
-	var (
-		keeper     Keeper
-		usedProtos sync.Map
-		router     http.ServeMux
-	)
-
 	message := prepareMessage(t)
 	caPool, serverCerts, clientCerts := genTempPKI(t, socketPath)
 
@@ -243,6 +237,11 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	listener, err := tls.Listen(NetworkName, socketPath, listenTLSConfig)
 	require.NoError(t, err)
 
+	var (
+		router     http.ServeMux
+		usedProtos sync.Map
+	)
+
 	router.HandleFunc(
 		requestPath,
 		func(w http.ResponseWriter, r *http.Request) {
@@ -257,12 +256,12 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		ReadTimeout: time.Second,
 	}
 
-	faults := make(chan error)
-	defer close(faults)
+	serverFaults := make(chan error)
+	defer close(serverFaults)
 
 	defer func() {
 		require.NoError(t, server.Shutdown(t.Context()))
-		require.Equal(t, http.ErrServerClosed, <-faults)
+		require.Equal(t, http.ErrServerClosed, <-serverFaults)
 
 		usedProtos.Range(
 			func(key any, _ any) bool {
@@ -278,7 +277,7 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	}()
 
 	go func() {
-		faults <- server.Serve(listener)
+		serverFaults <- server.Serve(listener)
 	}()
 
 	httpTransport := cloneDefaultHTTPTransport(t)
@@ -288,6 +287,8 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		MinVersion:   tls.VersionTLS13,
 		RootCAs:      caPool,
 	}
+
+	var keeper Keeper
 
 	require.NoError(t, keeper.AddPath(testHostname, socketPath))
 	require.NoError(t, Register(&keeper, WithTransport(httpTransport)))
