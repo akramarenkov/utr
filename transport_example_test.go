@@ -13,7 +13,7 @@ import (
 	"github.com/akramarenkov/utr"
 )
 
-func Example() {
+func ExampleTransport() {
 	const socketPath = "service.sock"
 
 	message := []byte("example message")
