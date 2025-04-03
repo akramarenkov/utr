@@ -26,22 +26,22 @@ func TestWithDefaultTransport(t *testing.T) {
 	http.DefaultTransport = nil
 
 	require.Error(t, WithDefaultTransport().adjust(trt))
-	require.Nil(t, trt.base)
+	require.Nil(t, trt.origin)
 
 	http.DefaultTransport = httpDefaultTransport
 
 	require.NoError(t, WithDefaultTransport().adjust(trt))
-	require.NotNil(t, trt.base)
+	require.NotNil(t, trt.origin)
 }
 
 func TestWithTransport(t *testing.T) {
 	trt := &Transport{}
 
 	require.Error(t, WithTransport(nil).adjust(trt))
-	require.Nil(t, trt.base)
+	require.Nil(t, trt.origin)
 
 	require.NoError(t, WithTransport(&http.Transport{}).adjust(trt))
-	require.NotNil(t, trt.base)
+	require.NotNil(t, trt.origin)
 }
 
 func TestWithSchemeHTTP(t *testing.T) {
