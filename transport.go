@@ -159,7 +159,7 @@ func (trt *Transport) dial(ctx context.Context, _, addr string) (net.Conn, error
 		return nil, err
 	}
 
-	return trt.dialer.DialContext(ctx, NetworkName, path)
+	return trt.dialer.DialContext(ctx, networkName, path)
 }
 
 func (trt *Transport) dialTLS(ctx context.Context, _, addr string) (net.Conn, error) {
@@ -172,5 +172,5 @@ func (trt *Transport) dialTLS(ctx context.Context, _, addr string) (net.Conn, er
 		return nil, err
 	}
 
-	return trt.tlsDialer.DialContext(ctx, NetworkName, path)
+	return trt.tlsDialer.DialContext(ctx, networkName, path)
 }
