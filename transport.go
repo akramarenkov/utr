@@ -11,34 +11,13 @@ import (
 // Unix socket transport.
 type Transport struct {
 	base        *http.Transport
-	origin      *http.Transport
 	resolver    Resolver
 	schemeHTTP  string
 	schemeHTTPS string
+	upstream    *http.Transport
 
 	dialer    *net.Dialer
 	tlsDialer *tls.Dialer
-}
-
-// Sets the specified transport as the upstream [http.Transport] for Unix socket
-// transport.
-func WithTransport(transport http.RoundTripper) Adjuster {
-	adj := func(trt *Transport) error {
-		httpTransport, casted := transport.(*http.Transport)
-		if !casted {
-			return ErrTransportInvalid
-		}
-
-		if httpTransport == nil {
-			return ErrTransportEmpty
-		}
-
-		trt.origin = httpTransport
-
-		return nil
-	}
-
-	return adjust(adj)
 }
 
 // Sets URL scheme for operation HTTP via Unix socket.
@@ -86,13 +65,13 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 // The [Resolver] of paths to Unix sockets by hostnames must be set. [Keeper] can
 // be used as it.
 //
-// The upstream [http.Transport] must be set using [WithDefaultTransport] or
-// [WithTransport] functions.
+// The upstream [http.Transport] must be set. [http.RoundTripper] used for convenience
+// to work with [http.DefaultTransport].
 //
 // If URL schemes for operation HTTP and HTTPS via Unix socket are not set using
 // [WithSchemeHTTP] and [WithSchemeHTTPS] functions, then URL schemes
 // [DefaultSchemeHTTP] and [DefaultSchemeHTTPS] will be used.
-func New(resolver Resolver, opts ...Adjuster) (*Transport, error) {
+func New(resolver Resolver, upstream http.RoundTripper, opts ...Adjuster) (*Transport, error) {
 	if resolver == nil {
 		return nil, ErrResolverEmpty
 	}
@@ -103,14 +82,14 @@ func New(resolver Resolver, opts ...Adjuster) (*Transport, error) {
 		dialer: &net.Dialer{},
 	}
 
+	if err := trt.setUpstream(upstream); err != nil {
+		return nil, err
+	}
+
 	for _, adj := range opts {
 		if err := adj.adjust(trt); err != nil {
 			return nil, err
 		}
-	}
-
-	if trt.origin == nil {
-		return nil, ErrTransportEmpty
 	}
 
 	if trt.schemeHTTP == "" {
@@ -121,7 +100,7 @@ func New(resolver Resolver, opts ...Adjuster) (*Transport, error) {
 		trt.schemeHTTPS = DefaultSchemeHTTPS
 	}
 
-	trt.base = trt.origin.Clone()
+	trt.base = trt.upstream.Clone()
 
 	trt.tlsDialer = &tls.Dialer{
 		Config: trt.base.TLSClientConfig,
@@ -133,10 +112,25 @@ func New(resolver Resolver, opts ...Adjuster) (*Transport, error) {
 	return trt, nil
 }
 
+func (trt *Transport) setUpstream(upstream http.RoundTripper) error {
+	httpTransport, casted := upstream.(*http.Transport)
+	if !casted {
+		return ErrTransportInvalid
+	}
+
+	if httpTransport == nil {
+		return ErrTransportEmpty
+	}
+
+	trt.upstream = httpTransport
+
+	return nil
+}
+
 // Implements the [http.RoundTripper] interface.
 func (trt *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if req.URL.Scheme != trt.schemeHTTP && req.URL.Scheme != trt.schemeHTTPS {
-		return trt.origin.RoundTrip(req)
+		return trt.upstream.RoundTrip(req)
 	}
 
 	cloned := req.Clone(req.Context())

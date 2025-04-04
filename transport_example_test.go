@@ -59,7 +59,7 @@ func ExampleTransport() {
 
 	var keeper utr.Keeper
 
-	transport, err := utr.New(&keeper, utr.WithTransport(http.DefaultTransport))
+	transport, err := utr.New(&keeper, http.DefaultTransport)
 	if err != nil {
 		panic(err)
 	}

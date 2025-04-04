@@ -19,21 +19,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestWithTransport(t *testing.T) {
-	trt := &Transport{}
-
-	require.Error(t, WithTransport(nil).adjust(trt))
-	require.Nil(t, trt.origin)
-
-	var httpTransport *http.Transport
-
-	require.Error(t, WithTransport(httpTransport).adjust(trt))
-	require.Nil(t, trt.origin)
-
-	require.NoError(t, WithTransport(&http.Transport{}).adjust(trt))
-	require.NotNil(t, trt.origin)
-}
-
 func TestWithSchemeHTTP(t *testing.T) {
 	trt := &Transport{}
 
@@ -61,17 +46,25 @@ func TestWithSchemeHTTPS(t *testing.T) {
 }
 
 func TestNewBadResolver(t *testing.T) {
-	trt, err := New(nil)
+	trt, err := New(nil, &http.Transport{})
 	require.Error(t, err)
 	require.Nil(t, trt)
 }
 
 func TestNewBadTransport(t *testing.T) {
-	trt, err := New(&Keeper{})
+	trt, err := New(&Keeper{}, nil)
 	require.Error(t, err)
 	require.Nil(t, trt)
 
-	trt, err = New(&Keeper{}, WithTransport(nil))
+	var httpTransport *http.Transport
+
+	trt, err = New(&Keeper{}, httpTransport)
+	require.Error(t, err)
+	require.Nil(t, trt)
+}
+
+func TestNewBadOpts(t *testing.T) {
+	trt, err := New(&Keeper{}, &http.Transport{}, WithSchemeHTTP("http"))
 	require.Error(t, err)
 	require.Nil(t, trt)
 }
@@ -153,7 +146,7 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 
 	require.NoError(t, keeper.AddPath(testHostname, socketPath))
 
-	trt, err := New(&keeper, WithTransport(httpTransport))
+	trt, err := New(&keeper, httpTransport)
 	require.NoError(t, err)
 
 	client := &http.Client{
@@ -287,7 +280,7 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 
 	require.NoError(t, keeper.AddPath(testHostname, socketPath))
 
-	trt, err := New(&keeper, WithTransport(httpTransport))
+	trt, err := New(&keeper, httpTransport)
 	require.NoError(t, err)
 
 	client := &http.Client{

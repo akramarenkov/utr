@@ -48,7 +48,7 @@ func BenchmarkTransport(b *testing.B) {
 
 	require.NoError(b, keeper.AddPath(testHostname, testSocketPath))
 
-	trt, err := New(&keeper, WithTransport(httpTransport))
+	trt, err := New(&keeper, httpTransport)
 	require.NoError(b, err)
 
 	client := &http.Client{
