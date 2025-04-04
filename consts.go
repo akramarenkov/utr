@@ -6,7 +6,7 @@ const (
 )
 
 const (
-	httpScheme  = "http"
-	httpsScheme = "https"
-	networkName = "unix"
+	httpScheme      = "http"
+	httpsScheme     = "https"
+	unixNetworkName = "unix"
 )

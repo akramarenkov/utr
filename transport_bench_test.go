@@ -13,7 +13,7 @@ import (
 func BenchmarkTransport(b *testing.B) {
 	const requestPath = "/request/path"
 
-	listener, err := net.Listen(networkName, testSocketPath)
+	listener, err := net.Listen(unixNetworkName, testSocketPath)
 	require.NoError(b, err)
 
 	var router http.ServeMux

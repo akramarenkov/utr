@@ -83,7 +83,7 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 
 	message := prepareMessage(t)
 
-	listener, err := net.Listen(networkName, socketPath)
+	listener, err := net.Listen(unixNetworkName, socketPath)
 	require.NoError(t, err)
 
 	var (
@@ -222,7 +222,7 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		listenTLSConfig.NextProtos = []string{"h2"}
 	}
 
-	listener, err := tls.Listen(networkName, socketPath, listenTLSConfig)
+	listener, err := tls.Listen(unixNetworkName, socketPath, listenTLSConfig)
 	require.NoError(t, err)
 
 	var (
