@@ -52,8 +52,8 @@ func main() {
         ReadTimeout: time.Second,
     }
 
-    serverFaults := make(chan error)
-    defer close(serverFaults)
+    serverErr := make(chan error)
+    defer close(serverErr)
 
     defer func() {
         ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -63,24 +63,27 @@ func main() {
             fmt.Println("Server shutdown error:", err)
         }
 
-        if err := <-serverFaults; !errors.Is(err, http.ErrServerClosed) {
+        if err := <-serverErr; !errors.Is(err, http.ErrServerClosed) {
             fmt.Println("Server has terminated abnormally:", err)
         }
     }()
 
     go func() {
-        serverFaults <- server.Serve(listener)
+        serverErr <- server.Serve(listener)
     }()
 
     var keeper utr.Keeper
 
-    if err := utr.Register(&keeper, utr.WithDefaultTransport()); err != nil {
+    transport, err := utr.New(&keeper, http.DefaultTransport)
+    if err != nil {
         panic(err)
     }
 
     if err := keeper.AddPath("service", socketPath); err != nil {
         panic(err)
     }
+
+    http.DefaultClient.Transport = transport
 
     resp, err := http.Get("http+unix://service/request/path")
     if err != nil {
