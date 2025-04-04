@@ -30,23 +30,23 @@ func BenchmarkTransport(b *testing.B) {
 		ReadTimeout: time.Second,
 	}
 
-	serverFaults := make(chan error)
-	defer close(serverFaults)
+	serverErr := make(chan error)
+	defer close(serverErr)
 
 	defer func() {
 		require.NoError(b, server.Shutdown(b.Context()))
-		require.Equal(b, http.ErrServerClosed, <-serverFaults)
+		require.Equal(b, http.ErrServerClosed, <-serverErr)
 	}()
 
 	go func() {
-		serverFaults <- server.Serve(listener)
+		serverErr <- server.Serve(listener)
 	}()
-
-	httpTransport := cloneDefaultHTTPTransportBench(b)
 
 	var keeper Keeper
 
 	require.NoError(b, keeper.AddPath(testHostname, testSocketPath))
+
+	httpTransport := cloneDefaultHTTPTransportBench(b)
 
 	trt, err := New(&keeper, httpTransport)
 	require.NoError(b, err)

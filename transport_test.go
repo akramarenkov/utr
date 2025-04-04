@@ -112,12 +112,12 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		server.Protocols = &protos
 	}
 
-	serverFaults := make(chan error)
-	defer close(serverFaults)
+	serverErr := make(chan error)
+	defer close(serverErr)
 
 	defer func() {
 		require.NoError(t, server.Shutdown(t.Context()))
-		require.Equal(t, http.ErrServerClosed, <-serverFaults)
+		require.Equal(t, http.ErrServerClosed, <-serverErr)
 
 		usedProtos.Range(
 			func(key any, _ any) bool {
@@ -133,18 +133,18 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	}()
 
 	go func() {
-		serverFaults <- server.Serve(listener)
+		serverErr <- server.Serve(listener)
 	}()
+
+	var keeper Keeper
+
+	require.NoError(t, keeper.AddPath(testHostname, socketPath))
 
 	httpTransport := cloneDefaultHTTPTransport(t)
 
 	if useHTTP2 {
 		httpTransport.Protocols = &protos
 	}
-
-	var keeper Keeper
-
-	require.NoError(t, keeper.AddPath(testHostname, socketPath))
 
 	trt, err := New(&keeper, httpTransport)
 	require.NoError(t, err)
@@ -244,12 +244,12 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		ReadTimeout: time.Second,
 	}
 
-	serverFaults := make(chan error)
-	defer close(serverFaults)
+	serverErr := make(chan error)
+	defer close(serverErr)
 
 	defer func() {
 		require.NoError(t, server.Shutdown(t.Context()))
-		require.Equal(t, http.ErrServerClosed, <-serverFaults)
+		require.Equal(t, http.ErrServerClosed, <-serverErr)
 
 		usedProtos.Range(
 			func(key any, _ any) bool {
@@ -265,8 +265,12 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	}()
 
 	go func() {
-		serverFaults <- server.Serve(listener)
+		serverErr <- server.Serve(listener)
 	}()
+
+	var keeper Keeper
+
+	require.NoError(t, keeper.AddPath(testHostname, socketPath))
 
 	httpTransport := cloneDefaultHTTPTransport(t)
 
@@ -275,10 +279,6 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		MinVersion:   tls.VersionTLS13,
 		RootCAs:      caPool,
 	}
-
-	var keeper Keeper
-
-	require.NoError(t, keeper.AddPath(testHostname, socketPath))
 
 	trt, err := New(&keeper, httpTransport)
 	require.NoError(t, err)
