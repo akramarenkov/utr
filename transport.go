@@ -20,32 +20,20 @@ type Transport struct {
 	tlsDialer *tls.Dialer
 }
 
-// Sets the [http.DefaultTransport] as the upstream [http.Transport] for Unix socket
-// transport.
-func WithDefaultTransport() Adjuster {
-	adj := func(trt *Transport) error {
-		def, casted := http.DefaultTransport.(*http.Transport)
-		if !casted {
-			return ErrDefaultTransportInvalid
-		}
-
-		trt.origin = def
-
-		return nil
-	}
-
-	return adjust(adj)
-}
-
 // Sets the specified transport as the upstream [http.Transport] for Unix socket
 // transport.
-func WithTransport(transport *http.Transport) Adjuster {
+func WithTransport(transport http.RoundTripper) Adjuster {
 	adj := func(trt *Transport) error {
-		if transport == nil {
+		httpTransport, casted := transport.(*http.Transport)
+		if !casted {
+			return ErrTransportInvalid
+		}
+
+		if httpTransport == nil {
 			return ErrTransportEmpty
 		}
 
-		trt.origin = transport
+		trt.origin = httpTransport
 
 		return nil
 	}
@@ -143,51 +131,6 @@ func New(resolver Resolver, opts ...Adjuster) (*Transport, error) {
 	trt.base.DialTLSContext = trt.dialTLS
 
 	return trt, nil
-}
-
-// Creates new Unix socket transport and registers it schemes for upstream
-// [http.Transport].
-//
-// The [Resolver] of paths to Unix sockets by hostnames must be set. [Keeper] can
-// be used as it.
-//
-// The upstream [http.Transport] must be set using [WithDefaultTransport] or
-// [WithTransport] functions.
-//
-// If URL schemes for operation HTTP and HTTPS via Unix socket are not set using
-// [WithSchemeHTTP] and [WithSchemeHTTPS] functions, then URL schemes
-// [DefaultSchemeHTTP] and [DefaultSchemeHTTPS] will be used. Multiple Unix socket
-// transports with the same URL schemes cannot be registered for one upstream
-// [http.Transport].
-func Register(resolver Resolver, opts ...Adjuster) error {
-	trt, err := New(resolver, opts...)
-	if err != nil {
-		return err
-	}
-
-	if err := trt.register(trt.schemeHTTP); err != nil {
-		return err
-	}
-
-	return trt.register(trt.schemeHTTPS)
-}
-
-func (trt *Transport) register(scheme string) error {
-	errs := make(chan error, 1)
-
-	func() {
-		defer func() {
-			if fault := recover(); fault != nil {
-				errs <- fmt.Errorf("%w: %v", ErrSchemeNotRegistered, fault)
-			}
-		}()
-
-		trt.origin.RegisterProtocol(scheme, trt)
-
-		errs <- nil
-	}()
-
-	return <-errs
 }
 
 // Implements the [http.RoundTripper] interface.

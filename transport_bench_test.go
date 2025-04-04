@@ -16,10 +16,7 @@ func BenchmarkTransport(b *testing.B) {
 	listener, err := net.Listen(NetworkName, testSocketPath)
 	require.NoError(b, err)
 
-	var (
-		keeper Keeper
-		router http.ServeMux
-	)
+	var router http.ServeMux
 
 	router.HandleFunc(
 		requestPath,
@@ -33,25 +30,29 @@ func BenchmarkTransport(b *testing.B) {
 		ReadTimeout: time.Second,
 	}
 
-	faults := make(chan error)
-	defer close(faults)
+	serverFaults := make(chan error)
+	defer close(serverFaults)
 
 	defer func() {
 		require.NoError(b, server.Shutdown(b.Context()))
-		require.Equal(b, http.ErrServerClosed, <-faults)
+		require.Equal(b, http.ErrServerClosed, <-serverFaults)
 	}()
 
 	go func() {
-		faults <- server.Serve(listener)
+		serverFaults <- server.Serve(listener)
 	}()
 
 	httpTransport := cloneDefaultHTTPTransportBench(b)
 
+	var keeper Keeper
+
 	require.NoError(b, keeper.AddPath(testHostname, testSocketPath))
-	require.NoError(b, Register(&keeper, WithTransport(httpTransport)))
+
+	trt, err := New(&keeper, WithTransport(httpTransport))
+	require.NoError(b, err)
 
 	client := &http.Client{
-		Transport: httpTransport,
+		Transport: trt,
 	}
 
 	requestURL := url.URL{

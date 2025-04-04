@@ -37,8 +37,8 @@ func ExampleTransport() {
 		ReadTimeout: time.Second,
 	}
 
-	faults := make(chan error)
-	defer close(faults)
+	serverFaults := make(chan error)
+	defer close(serverFaults)
 
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -48,24 +48,27 @@ func ExampleTransport() {
 			fmt.Println("Server shutdown error:", err)
 		}
 
-		if err := <-faults; !errors.Is(err, http.ErrServerClosed) {
+		if err := <-serverFaults; !errors.Is(err, http.ErrServerClosed) {
 			fmt.Println("Server has terminated abnormally:", err)
 		}
 	}()
 
 	go func() {
-		faults <- server.Serve(listener)
+		serverFaults <- server.Serve(listener)
 	}()
 
 	var keeper utr.Keeper
 
-	if err := utr.Register(&keeper, utr.WithDefaultTransport()); err != nil {
+	transport, err := utr.New(&keeper, utr.WithTransport(http.DefaultTransport))
+	if err != nil {
 		panic(err)
 	}
 
 	if err := keeper.AddPath("service", socketPath); err != nil {
 		panic(err)
 	}
+
+	http.DefaultClient.Transport = transport
 
 	resp, err := http.Get("http+unix://service/request/path")
 	if err != nil {

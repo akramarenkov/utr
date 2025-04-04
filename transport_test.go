@@ -19,25 +19,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestWithDefaultTransport(t *testing.T) {
-	trt := &Transport{}
-
-	httpDefaultTransport := http.DefaultTransport
-	http.DefaultTransport = nil
-
-	require.Error(t, WithDefaultTransport().adjust(trt))
-	require.Nil(t, trt.origin)
-
-	http.DefaultTransport = httpDefaultTransport
-
-	require.NoError(t, WithDefaultTransport().adjust(trt))
-	require.NotNil(t, trt.origin)
-}
-
 func TestWithTransport(t *testing.T) {
 	trt := &Transport{}
 
 	require.Error(t, WithTransport(nil).adjust(trt))
+	require.Nil(t, trt.origin)
+
+	var httpTransport *http.Transport
+
+	require.Error(t, WithTransport(httpTransport).adjust(trt))
 	require.Nil(t, trt.origin)
 
 	require.NoError(t, WithTransport(&http.Transport{}).adjust(trt))
@@ -70,19 +60,20 @@ func TestWithSchemeHTTPS(t *testing.T) {
 	require.Equal(t, "uhttps", trt.schemeHTTPS)
 }
 
-func TestRegister(t *testing.T) {
-	upstreamHTTP := &http.Transport{}
-	upstreamHTTPS := &http.Transport{}
+func TestNewBadResolver(t *testing.T) {
+	trt, err := New(nil)
+	require.Error(t, err)
+	require.Nil(t, trt)
+}
 
-	require.Error(t, Register(nil))
-	require.Error(t, Register(&Keeper{}))
-	require.Error(t, Register(&Keeper{}, WithTransport(nil)))
+func TestNewBadTransport(t *testing.T) {
+	trt, err := New(&Keeper{})
+	require.Error(t, err)
+	require.Nil(t, trt)
 
-	require.NoError(t, Register(&Keeper{}, WithTransport(upstreamHTTP)))
-	require.Error(t, Register(&Keeper{}, WithTransport(upstreamHTTP)))
-
-	require.NoError(t, Register(&Keeper{}, WithTransport(upstreamHTTPS)))
-	require.Error(t, Register(&Keeper{}, WithTransport(upstreamHTTPS), WithSchemeHTTP("uhttp")))
+	trt, err = New(&Keeper{}, WithTransport(nil))
+	require.Error(t, err)
+	require.Nil(t, trt)
 }
 
 func TestTransport(t *testing.T) {
@@ -97,17 +88,15 @@ func TestTransportHTTP2(t *testing.T) {
 func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	const requestPath = "/request/path"
 
-	var (
-		keeper     Keeper
-		protos     http.Protocols
-		router     http.ServeMux
-		usedProtos sync.Map
-	)
-
 	message := prepareMessage(t)
 
 	listener, err := net.Listen(NetworkName, socketPath)
 	require.NoError(t, err)
+
+	var (
+		router     http.ServeMux
+		usedProtos sync.Map
+	)
 
 	router.HandleFunc(
 		requestPath,
@@ -123,17 +112,19 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		ReadTimeout: time.Second,
 	}
 
+	var protos http.Protocols
+
 	if useHTTP2 {
 		protos.SetUnencryptedHTTP2(true)
 		server.Protocols = &protos
 	}
 
-	faults := make(chan error)
-	defer close(faults)
+	serverFaults := make(chan error)
+	defer close(serverFaults)
 
 	defer func() {
 		require.NoError(t, server.Shutdown(t.Context()))
-		require.Equal(t, http.ErrServerClosed, <-faults)
+		require.Equal(t, http.ErrServerClosed, <-serverFaults)
 
 		usedProtos.Range(
 			func(key any, _ any) bool {
@@ -149,7 +140,7 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	}()
 
 	go func() {
-		faults <- server.Serve(listener)
+		serverFaults <- server.Serve(listener)
 	}()
 
 	httpTransport := cloneDefaultHTTPTransport(t)
@@ -158,11 +149,15 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		httpTransport.Protocols = &protos
 	}
 
+	var keeper Keeper
+
 	require.NoError(t, keeper.AddPath(testHostname, socketPath))
-	require.NoError(t, Register(&keeper, WithTransport(httpTransport)))
+
+	trt, err := New(&keeper, WithTransport(httpTransport))
+	require.NoError(t, err)
 
 	client := &http.Client{
-		Transport: httpTransport,
+		Transport: trt,
 	}
 
 	requestURL := url.URL{
@@ -291,10 +286,12 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	var keeper Keeper
 
 	require.NoError(t, keeper.AddPath(testHostname, socketPath))
-	require.NoError(t, Register(&keeper, WithTransport(httpTransport)))
+
+	trt, err := New(&keeper, WithTransport(httpTransport))
+	require.NoError(t, err)
 
 	client := &http.Client{
-		Transport: httpTransport,
+		Transport: trt,
 	}
 
 	requestURL := url.URL{
