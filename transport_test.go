@@ -330,6 +330,75 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	require.Nil(t, resp)
 }
 
+func TestTransportPassthrough(t *testing.T) {
+	const requestPath = "/request/path"
+
+	message := prepareMessage(t)
+
+	listener, err := net.Listen("tcp", "127.0.0.1:")
+	require.NoError(t, err)
+
+	var router http.ServeMux
+
+	router.HandleFunc(
+		requestPath,
+		func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write(message)
+		},
+	)
+
+	server := &http.Server{
+		Handler:     &router,
+		ReadTimeout: time.Second,
+	}
+
+	serverErr := make(chan error)
+	defer close(serverErr)
+
+	defer func() {
+		require.NoError(t, server.Shutdown(t.Context()))
+		require.Equal(t, http.ErrServerClosed, <-serverErr)
+	}()
+
+	go func() {
+		serverErr <- server.Serve(listener)
+	}()
+
+	var keeper Keeper
+
+	httpTransport := cloneDefaultHTTPTransport(t)
+
+	trt, err := New(&keeper, httpTransport)
+	require.NoError(t, err)
+
+	client := &http.Client{
+		Transport: trt,
+	}
+
+	requestURL := url.URL{
+		Scheme: "http",
+		Host:   listener.Addr().String(),
+		Path:   requestPath,
+	}
+
+	request, err := http.NewRequestWithContext(
+		t.Context(),
+		http.MethodGet,
+		requestURL.String(),
+		http.NoBody,
+	)
+	require.NoError(t, err)
+
+	resp, err := client.Do(request)
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+
+	output, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.Equal(t, message, output)
+	require.NoError(t, resp.Body.Close())
+}
+
 func prepareMessage(t *testing.T) []byte {
 	const messageSize = 1024
 
