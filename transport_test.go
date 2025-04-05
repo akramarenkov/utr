@@ -194,6 +194,8 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	resp, err = client.Do(request)
 	require.Error(t, err)
 	require.Nil(t, resp)
+
+	client.CloseIdleConnections()
 }
 
 func TestTransportTLS(t *testing.T) {
@@ -328,6 +330,8 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	resp, err = client.Do(request)
 	require.Error(t, err)
 	require.Nil(t, resp)
+
+	client.CloseIdleConnections()
 }
 
 func TestTransportPassthrough(t *testing.T) {
@@ -397,6 +401,8 @@ func TestTransportPassthrough(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, message, output)
 	require.NoError(t, resp.Body.Close())
+
+	client.CloseIdleConnections()
 }
 
 func prepareMessage(t *testing.T) []byte {

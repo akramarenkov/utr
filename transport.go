@@ -140,6 +140,11 @@ func (trt *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return trt.base.RoundTrip(cloned)
 }
 
+func (trt *Transport) CloseIdleConnections() {
+	trt.base.CloseIdleConnections()
+	trt.upstream.CloseIdleConnections()
+}
+
 func (trt *Transport) replaceScheme(req *http.Request) {
 	switch req.URL.Scheme {
 	case trt.schemeHTTP:
