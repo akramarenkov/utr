@@ -140,6 +140,7 @@ func (trt *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return trt.base.RoundTrip(cloned)
 }
 
+// Like the [http.Transport.CloseIdleConnections].
 func (trt *Transport) CloseIdleConnections() {
 	trt.base.CloseIdleConnections()
 	trt.upstream.CloseIdleConnections()
