@@ -119,17 +119,19 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		require.NoError(t, server.Shutdown(t.Context()))
 		require.Equal(t, http.ErrServerClosed, <-serverErr)
 
-		usedProtos.Range(
-			func(key any, _ any) bool {
-				if useHTTP2 {
-					require.Equal(t, http2Proto, key)
-				} else {
-					require.Equal(t, http1Proto, key)
-				}
+		if useHTTP2 {
+			_, exists := usedProtos.Load(http2Proto)
+			require.True(t, exists)
 
-				return true
-			},
-		)
+			_, exists = usedProtos.Load(http1Proto)
+			require.False(t, exists)
+		} else {
+			_, exists := usedProtos.Load(http2Proto)
+			require.False(t, exists)
+
+			_, exists = usedProtos.Load(http1Proto)
+			require.True(t, exists)
+		}
 	}()
 
 	go func() {
@@ -253,17 +255,19 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		require.NoError(t, server.Shutdown(t.Context()))
 		require.Equal(t, http.ErrServerClosed, <-serverErr)
 
-		usedProtos.Range(
-			func(key any, _ any) bool {
-				if useHTTP2 {
-					require.Equal(t, http2Proto, key)
-				} else {
-					require.Equal(t, http1Proto, key)
-				}
+		if useHTTP2 {
+			_, exists := usedProtos.Load(http2Proto)
+			require.True(t, exists)
 
-				return true
-			},
-		)
+			_, exists = usedProtos.Load(http1Proto)
+			require.False(t, exists)
+		} else {
+			_, exists := usedProtos.Load(http2Proto)
+			require.False(t, exists)
+
+			_, exists = usedProtos.Load(http1Proto)
+			require.True(t, exists)
+		}
 	}()
 
 	go func() {

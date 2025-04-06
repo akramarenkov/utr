@@ -79,12 +79,12 @@ func BenchmarkTransport(b *testing.B) {
 			require.NoError(b, err)
 		}
 
-		if resp.StatusCode != http.StatusOK {
-			require.Equal(b, http.StatusOK, resp.StatusCode)
-		}
-
 		if err := resp.Body.Close(); err != nil {
 			require.NoError(b, err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			require.Equal(b, http.StatusOK, resp.StatusCode)
 		}
 	}
 }
