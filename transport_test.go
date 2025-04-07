@@ -83,9 +83,6 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 
 	message := prepareMessage(t)
 
-	listener, err := net.Listen(unixNetworkName, socketPath)
-	require.NoError(t, err)
-
 	var (
 		router     http.ServeMux
 		usedProtos sync.Map
@@ -114,6 +111,9 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 
 	serverErr := make(chan error)
 	defer close(serverErr)
+
+	listener, err := net.Listen(unixNetworkName, socketPath)
+	require.NoError(t, err)
 
 	defer func() {
 		require.NoError(t, server.Shutdown(t.Context()))
@@ -226,9 +226,6 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 		listenTLSConfig.NextProtos = []string{"h2"}
 	}
 
-	listener, err := tls.Listen(unixNetworkName, socketPath, listenTLSConfig)
-	require.NoError(t, err)
-
 	var (
 		router     http.ServeMux
 		usedProtos sync.Map
@@ -250,6 +247,9 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 
 	serverErr := make(chan error)
 	defer close(serverErr)
+
+	listener, err := tls.Listen(unixNetworkName, socketPath, listenTLSConfig)
+	require.NoError(t, err)
 
 	defer func() {
 		require.NoError(t, server.Shutdown(t.Context()))
@@ -343,9 +343,6 @@ func TestTransportPassthrough(t *testing.T) {
 
 	message := prepareMessage(t)
 
-	listener, err := net.Listen("tcp", "127.0.0.1:")
-	require.NoError(t, err)
-
 	var router http.ServeMux
 
 	router.HandleFunc(
@@ -362,6 +359,9 @@ func TestTransportPassthrough(t *testing.T) {
 
 	serverErr := make(chan error)
 	defer close(serverErr)
+
+	listener, err := net.Listen("tcp", "127.0.0.1:")
+	require.NoError(t, err)
 
 	defer func() {
 		require.NoError(t, server.Shutdown(t.Context()))
