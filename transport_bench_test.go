@@ -13,9 +13,6 @@ import (
 func BenchmarkTransport(b *testing.B) {
 	const requestPath = "/request/path"
 
-	listener, err := net.Listen(unixNetworkName, testSocketPath)
-	require.NoError(b, err)
-
 	var router http.ServeMux
 
 	router.HandleFunc(
@@ -32,6 +29,9 @@ func BenchmarkTransport(b *testing.B) {
 
 	serverErr := make(chan error)
 	defer close(serverErr)
+
+	listener, err := net.Listen(unixNetworkName, testSocketPath)
+	require.NoError(b, err)
 
 	defer func() {
 		require.NoError(b, server.Shutdown(b.Context()))
