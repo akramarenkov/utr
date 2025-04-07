@@ -243,6 +243,7 @@ func testTransportTLSBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	server := &http.Server{
 		Handler:     &router,
 		ReadTimeout: time.Second,
+		TLSConfig:   listenTLSConfig,
 	}
 
 	serverErr := make(chan error)
