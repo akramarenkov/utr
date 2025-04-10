@@ -1,6 +1,6 @@
 package utr
 
-// Provides adjusting of a Unix socket transport.
+// Provides adjusting of a Unix domain socket transport.
 type Adjuster interface {
 	adjust(t *Transport) error
 }

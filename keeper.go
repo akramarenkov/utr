@@ -6,12 +6,12 @@ import (
 	"sync"
 )
 
-// Keeps and resolves mappings of hostnames and paths to Unix sockets.
+// Keeps and resolves mappings of hostnames and paths to Unix domain sockets.
 type Keeper struct {
 	table sync.Map
 }
 
-// Adds mapping of hostname and path to Unix socket.
+// Adds mapping of hostname and path to Unix domain socket.
 func (kpr *Keeper) AddPath(hostname, path string) error {
 	if err := isValidHostname(hostname); err != nil {
 		return err
@@ -38,7 +38,7 @@ func isValidHostname(hostname string) error {
 	return nil
 }
 
-// Resolves path to Unix socket by hostname.
+// Resolves path to Unix domain socket by hostname.
 func (kpr *Keeper) LookupPath(hostname string) (string, error) {
 	path, exists := kpr.table.Load(hostname)
 	if !exists {

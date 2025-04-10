@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-// Unix socket transport.
+// Unix domain socket transport.
 type Transport struct {
 	base        *http.Transport
 	resolver    Resolver
@@ -20,7 +20,7 @@ type Transport struct {
 	tlsDialer *tls.Dialer
 }
 
-// Sets URL scheme for operation HTTP via Unix socket.
+// Sets URL scheme for operation HTTP via Unix domain socket.
 func WithSchemeHTTP(scheme string) Adjuster {
 	adj := func(trt *Transport) error {
 		if scheme == "" {
@@ -39,7 +39,7 @@ func WithSchemeHTTP(scheme string) Adjuster {
 	return adjust(adj)
 }
 
-// Sets URL scheme for operation HTTPS via Unix socket.
+// Sets URL scheme for operation HTTPS via Unix domain socket.
 func WithSchemeHTTPS(scheme string) Adjuster {
 	adj := func(trt *Transport) error {
 		if scheme == "" {
@@ -58,17 +58,17 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 	return adjust(adj)
 }
 
-// Creates new Unix socket transport with upstream [http.Transport]. For Unix socket
+// Creates new Unix domain socket transport with upstream [http.Transport]. For Unix domain socket
 // schemes will be used a clone of an upstream [http.Transport], for other schemes
 // an upstream [http.Transport] will be used directly.
 //
-// The [Resolver] of paths to Unix sockets by hostnames must be set. [Keeper] can
+// The [Resolver] of paths to Unix domain sockets by hostnames must be set. [Keeper] can
 // be used as it.
 //
 // The upstream [http.Transport] must be set. [http.RoundTripper] used for convenience
 // to work with [http.DefaultTransport].
 //
-// If URL schemes for operation HTTP and HTTPS via Unix socket are not set using
+// If URL schemes for operation HTTP and HTTPS via Unix domain socket are not set using
 // [WithSchemeHTTP] and [WithSchemeHTTPS] functions, then URL schemes
 // [DefaultSchemeHTTP] and [DefaultSchemeHTTPS] will be used.
 func New(resolver Resolver, upstream http.RoundTripper, opts ...Adjuster) (*Transport, error) {
