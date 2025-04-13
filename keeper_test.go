@@ -90,27 +90,27 @@ func BenchmarkRaceKeeper(b *testing.B) {
 
 	require.NoError(b, keeper.AddPath(testHostname, testSocketPath))
 
-	for b.Loop() {
-		b.RunParallel(
-			func(pb *testing.PB) {
-				for pb.Next() {
-					id := counter.Add(1)
+	b.ResetTimer()
 
-					if id%2 == 0 {
-						if _, err := keeper.LookupPath(testHostname); err != nil {
-							require.NoError(b, err)
-						}
+	b.RunParallel(
+		func(pb *testing.PB) {
+			for pb.Next() {
+				id := counter.Add(1)
 
-						continue
-					}
-
-					hostname := testHostname + strconv.FormatInt(id, 10)
-
-					if err := keeper.AddPath(hostname, testSocketPath); err != nil {
+				if id%2 == 0 {
+					if _, err := keeper.LookupPath(testHostname); err != nil {
 						require.NoError(b, err)
 					}
+
+					continue
 				}
-			},
-		)
-	}
+
+				hostname := testHostname + strconv.FormatInt(id, 10)
+
+				if err := keeper.AddPath(hostname, testSocketPath); err != nil {
+					require.NoError(b, err)
+				}
+			}
+		},
+	)
 }
