@@ -22,26 +22,26 @@ import (
 func TestWithSchemeHTTP(t *testing.T) {
 	trt := &Transport{}
 
-	require.Error(t, WithSchemeHTTP("").adjust(trt))
+	require.Error(t, WithSchemeHTTP("")(trt))
 	require.Empty(t, trt.schemeHTTP)
 
-	require.Error(t, WithSchemeHTTP("http").adjust(trt))
+	require.Error(t, WithSchemeHTTP("http")(trt))
 	require.Empty(t, trt.schemeHTTP)
 
-	require.NoError(t, WithSchemeHTTP("uhttp").adjust(trt))
+	require.NoError(t, WithSchemeHTTP("uhttp")(trt))
 	require.Equal(t, "uhttp", trt.schemeHTTP)
 }
 
 func TestWithSchemeHTTPS(t *testing.T) {
 	trt := &Transport{}
 
-	require.Error(t, WithSchemeHTTPS("").adjust(trt))
+	require.Error(t, WithSchemeHTTPS("")(trt))
 	require.Empty(t, trt.schemeHTTPS)
 
-	require.Error(t, WithSchemeHTTPS("https").adjust(trt))
+	require.Error(t, WithSchemeHTTPS("https")(trt))
 	require.Empty(t, trt.schemeHTTPS)
 
-	require.NoError(t, WithSchemeHTTPS("uhttps").adjust(trt))
+	require.NoError(t, WithSchemeHTTPS("uhttps")(trt))
 	require.Equal(t, "uhttps", trt.schemeHTTPS)
 }
 

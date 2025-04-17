@@ -8,6 +8,9 @@ import (
 	"net/http"
 )
 
+// Provides adjusting of a Unix domain socket transport.
+type Adjuster func(t *Transport) error
+
 // Unix domain socket transport.
 type Transport struct {
 	base        *http.Transport
@@ -36,7 +39,7 @@ func WithSchemeHTTP(scheme string) Adjuster {
 		return nil
 	}
 
-	return adjust(adj)
+	return adj
 }
 
 // Sets URL scheme for operation HTTPS via Unix domain socket.
@@ -55,7 +58,7 @@ func WithSchemeHTTPS(scheme string) Adjuster {
 		return nil
 	}
 
-	return adjust(adj)
+	return adj
 }
 
 // Creates new Unix domain socket transport with upstream [http.Transport]. For Unix domain socket
@@ -87,7 +90,7 @@ func New(resolver Resolver, upstream http.RoundTripper, opts ...Adjuster) (*Tran
 	}
 
 	for _, adj := range opts {
-		if err := adj.adjust(trt); err != nil {
+		if err := adj(trt); err != nil {
 			return nil, err
 		}
 	}
