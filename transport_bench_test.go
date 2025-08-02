@@ -30,7 +30,9 @@ func BenchmarkTransport(b *testing.B) {
 	serverErr := make(chan error)
 	defer close(serverErr)
 
-	listener, err := net.Listen(unixNetworkName, testSocketPath)
+	var blank net.ListenConfig
+
+	listener, err := blank.Listen(b.Context(), unixNetworkName, testSocketPath)
 	require.NoError(b, err)
 
 	defer func() {
@@ -109,7 +111,9 @@ func BenchmarkRaceTransport(b *testing.B) {
 	serverErr := make(chan error)
 	defer close(serverErr)
 
-	listener, err := net.Listen(unixNetworkName, testSocketPath)
+	var blank net.ListenConfig
+
+	listener, err := blank.Listen(b.Context(), unixNetworkName, testSocketPath)
 	require.NoError(b, err)
 
 	defer func() {

@@ -112,7 +112,9 @@ func testTransportBase(t *testing.T, socketPath string, useHTTP2 bool) {
 	serverErr := make(chan error)
 	defer close(serverErr)
 
-	listener, err := net.Listen(unixNetworkName, socketPath)
+	var blank net.ListenConfig
+
+	listener, err := blank.Listen(t.Context(), unixNetworkName, socketPath)
 	require.NoError(t, err)
 
 	defer func() {
@@ -361,7 +363,9 @@ func TestTransportPassthrough(t *testing.T) {
 	serverErr := make(chan error)
 	defer close(serverErr)
 
-	listener, err := net.Listen("tcp", "127.0.0.1:")
+	var blank net.ListenConfig
+
+	listener, err := blank.Listen(t.Context(), "tcp", "127.0.0.1:")
 	require.NoError(t, err)
 
 	defer func() {
